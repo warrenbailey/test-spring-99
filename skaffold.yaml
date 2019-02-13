@@ -1,0 +1,30 @@
+apiVersion: skaffold/v1beta2
+kind: Config
+build:
+  artifacts:
+  - image: changeme
+    context: .
+    docker: {}
+  tagPolicy:
+    envTemplate:
+      template: '{{.DOCKER_REGISTRY}}/warrenbailey/test-spring-99:{{.VERSION}}'
+  local: {}
+deploy:
+  kubectl: {}
+profiles:
+- name: dev
+  build:
+    artifacts:
+    - docker: {}
+    tagPolicy:
+      envTemplate:
+        template: '{{.DOCKER_REGISTRY}}/warrenbailey/test-spring-99:{{.DIGEST_HEX}}'
+    local: {}
+  deploy:
+    helm:
+      releases:
+      - name: test-spring-99
+        chartPath: charts/test-spring-99
+        setValueTemplates:
+          image.repository: '{{.DOCKER_REGISTRY}}/warrenbailey/test-spring-99'
+          image.tag: '{{.DIGEST_HEX}}'
